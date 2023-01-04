@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">GameMaster</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
     <string name="hello_world">From the Square world,\nHello, %1$s!</string>
+    <string name="dice_roll_button_text">Roll</string>
+    <string name="dice_label">Dice</string>
+    <string name="squash_label">Squash</string>
+    <string name="pointer_label">Single Pointer</string>
+    <string name="multiple_pointer_label">Multiple Pointer</string>
+    <string name="game_over_label">Game Over</string>
 </resources>
