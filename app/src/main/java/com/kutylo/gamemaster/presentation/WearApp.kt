@@ -1,10 +1,7 @@
 package com.kutylo.gamemaster.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
@@ -21,8 +18,9 @@ import com.kutylo.gamemaster.presentation.navigation.Screen
 import com.kutylo.gamemaster.presentation.navigation.PlayerIndex
 import com.kutylo.gamemaster.presentation.theme.GameMasterTheme
 import com.kutylo.gamemaster.presentation.ui.landing.LandingScreen
-import com.kutylo.gamemaster.presentation.ui.pointer.AddPoints
-import com.kutylo.gamemaster.presentation.ui.pointer.MultiplePointerApp
+import com.kutylo.gamemaster.presentation.ui.multiplepointer.AddPointsToMultiplePointer
+import com.kutylo.gamemaster.presentation.ui.multiplepointer.MultiplePointerApp
+import com.kutylo.gamemaster.presentation.ui.singlepointer.AddPointsToSinglePointer
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameApp
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameEndedScreen
 
@@ -47,13 +45,35 @@ fun WearApp(
     var pointerPlayer1 = PointerPlayer(
         0,
         "Roman",
-        remember { mutableStateOf(0) })
-    var pointerPlaye2 = PointerPlayer(
+        0
+    )
+    var pointerPlayer2 = PointerPlayer(
         1,
         "Marta",
-        remember { mutableStateOf(0) })
-    var pointerPlayes = mutableListOf(pointerPlayer1, pointerPlaye2)
+        0
+    )
 
+    var singlePointerPlayer1 = PointerPlayer(
+        0,
+        "Roman",
+        0
+    )
+    var singlePointerPlayer2 = PointerPlayer(
+        1,
+        "Marta",
+        0
+    )
+
+    var playersCount = 2;
+    val multiplePointerPlayers = remember { mutableStateListOf<PointerPlayer>() }
+    multiplePointerPlayers.add(pointerPlayer1)
+    multiplePointerPlayers.add(pointerPlayer2)
+
+
+    var singlePointerPlayersCount = 2;
+    val singlePointerPlayers = remember { mutableStateListOf<PointerPlayer>() }
+    singlePointerPlayers.add(singlePointerPlayer1)
+    singlePointerPlayers.add(singlePointerPlayer2)
 
     //Main Screen
     GameMasterTheme() {
@@ -90,7 +110,7 @@ fun WearApp(
                         menuNameAndCallback(
                             navController = swipeDismissableNavController,
                             menuNameResource = R.string.pointer_label,
-                            screen = Screen.Squash
+                            screen = Screen.SinglePointer
                         ),
                         menuNameAndCallback(
                             navController = swipeDismissableNavController,
@@ -133,13 +153,38 @@ fun WearApp(
                     })
                 }
 
+                //------------POINTERS-----------------------------------------------
                 //Multiple pointer players window
                 composable(Screen.MultiplePointer.route) {
-                    MultiplePointerApp(players = pointerPlayes, listState) { index ->
-                        swipeDismissableNavController.navigate(
-                            Screen.MultiplePointerPlayer.route + "/" + index
-                        ) { launchSingleTop = true }
-                    }
+                    MultiplePointerApp(
+                        players = multiplePointerPlayers,
+                        listState,
+                        onClickPlayer = { index ->
+                            swipeDismissableNavController.navigate(
+                                Screen.MultiplePointerPlayer.route + "/" + index
+                            ) { launchSingleTop = true }
+                        },
+                        onClickAddPlayer = {
+                            addPlayerToMultiplePointer(playersCount, playersList = multiplePointerPlayers)
+                            playersCount++
+                        })
+                }
+
+
+                //Single pointer players window
+                composable(Screen.SinglePointer.route) {
+                    MultiplePointerApp(
+                        players = singlePointerPlayers,
+                        listState,
+                        onClickPlayer = { index ->
+                            swipeDismissableNavController.navigate(
+                                Screen.SinglePointerPlayer.route + "/" + index
+                            ) { launchSingleTop = true }
+                        },
+                        onClickAddPlayer = {
+                            addPlayerToMultiplePointer(singlePointerPlayersCount, playersList = singlePointerPlayers)
+                            singlePointerPlayersCount++
+                        })
                 }
 
                 //Multiple pointer add point window
@@ -151,7 +196,20 @@ fun WearApp(
                         })
                 ) {
                     val index: Int = it.arguments!!.getInt(PlayerIndex)
-                    AddPoints(player = pointerPlayes.get(index), swipeDismissableNavController)
+                    AddPointsToMultiplePointer(player = multiplePointerPlayers.get(index), swipeDismissableNavController)
+                }
+
+
+                //Single pointer add point window
+                composable(
+                    route = Screen.SinglePointerPlayer.route + "/{$PlayerIndex}",
+                    arguments = listOf(
+                        navArgument(PlayerIndex) {
+                            type = NavType.IntType
+                        })
+                ) {
+                    val index: Int = it.arguments!!.getInt(PlayerIndex)
+                    AddPointsToSinglePointer(player = singlePointerPlayers.get(index), swipeDismissableNavController)
                 }
             }
         }
@@ -166,16 +224,11 @@ private fun menuNameAndCallback(
 ) = MenuItem(stringResource(menuNameResource)) { navController.navigate(screen.route) }
 
 
-@Composable
 private fun addPlayerToMultiplePointer(
     playersAmountIndex: Int,
     playersList: MutableList<PointerPlayer>
 ) {
-    var playerPoint = remember {
-        mutableStateOf(0)
-    }
-    val player = PointerPlayer(playersAmountIndex, "Player$playersAmountIndex +1", playerPoint)
-
+    val player = PointerPlayer(playersAmountIndex, "Player${playersAmountIndex + 1}", 0)
     playersList.add(playersAmountIndex, player)
 }
 
@@ -183,4 +236,5 @@ data class MenuItem(val name: String, val clickHander: () -> Unit)
 
 data class Player(val name: String, var points: MutableState<Int>, var games: MutableState<Int>)
 
-data class PointerPlayer(val index: Int, val name: String, var points: MutableState<Int>)
+//data class PointerPlayer(val index: Int, val name: String, var points: MutableState<Int>)
+data class PointerPlayer(val index: Int, val name: String, var points: Int)

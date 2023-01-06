@@ -1,4 +1,4 @@
-package com.kutylo.gamemaster.presentation.ui.pointer
+package com.kutylo.gamemaster.presentation.ui.multiplepointer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +17,8 @@ import com.kutylo.gamemaster.presentation.PointerPlayer
 fun MultiplePointerApp(
     players: List<PointerPlayer>,
     listState: ScalingLazyListState,
-    onClickPlayer: (Int) -> Unit
+    onClickPlayer: (Int) -> Unit,
+    onClickAddPlayer: () -> Unit
 ) {
     ScalingLazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -30,6 +31,15 @@ fun MultiplePointerApp(
         items(players) { player ->
             PlayerChip(player = player, onClickPlayer)
         }
+
+        //Add Player Button
+        item {
+            Chip(
+                onClick = {onClickAddPlayer()},
+                label = {
+                    Text(text = "Add Player")
+                })
+        }
     }
 }
 
@@ -40,7 +50,7 @@ fun PlayerChip(player: PointerPlayer, onClickPlayer: (Int) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         label = {
             Text(
-                text = "${player.name}: ${player.points.value}", maxLines = 1,
+                text = "${player.name}: ${player.points}", maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }

@@ -1,4 +1,4 @@
-package com.kutylo.gamemaster.presentation.ui.pointer
+package com.kutylo.gamemaster.presentation.ui.multiplepointer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -26,16 +26,17 @@ import com.kutylo.gamemaster.presentation.navigation.Screen
 import com.kutylo.gamemaster.presentation.theme.GameMasterTheme
 
 @Composable
-fun AddPoints(player: PointerPlayer, swipeDismissableNavController: NavHostController) {
+fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavController: NavHostController) {
     val focusManager = LocalFocusManager.current
     var pointsAmount by remember {
         mutableStateOf("")
     }
+
+
     GameMasterTheme {
         Column(
             Modifier
                 .fillMaxSize(),
-                //.wrapContentSize(Alignment.Center),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -43,7 +44,7 @@ fun AddPoints(player: PointerPlayer, swipeDismissableNavController: NavHostContr
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 5.dp),
-                text = "${player.name}: ${player.points.value}", maxLines = 1,
+                text = "${player.name}: ${player.points}", maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
@@ -62,20 +63,26 @@ fun AddPoints(player: PointerPlayer, swipeDismissableNavController: NavHostContr
             Row(horizontalArrangement = Arrangement.Center) {
                 Button(modifier = Modifier.padding(end = 25.dp),
                     onClick = {
-                        player.points.value = player.points.value + pointsAmount.toInt()
+                        player.points = player.points + pointsAmount.toInt()
                         swipeDismissableNavController.navigate(
                             Screen.MultiplePointer.route
-                        ) {launchSingleTop = true }
+                        ) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Landing.route)
+                        }
                     }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
                 Button(
                     modifier = Modifier.padding(start = 25.dp),
                     onClick = {
-                        player.points.value = player.points.value - pointsAmount.toInt()
+                        player.points = player.points - pointsAmount.toInt()
                         swipeDismissableNavController.navigate(
                             Screen.MultiplePointer.route
-                        ) {launchSingleTop = true }
+                        ) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Landing.route)
+                        }
                     }) {
                     Icon(
                         painter = painterResource(id = R.drawable.remove_icon),

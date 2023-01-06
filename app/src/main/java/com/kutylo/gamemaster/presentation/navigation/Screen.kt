@@ -27,5 +27,7 @@ sealed class Screen(
     object Squash : Screen("squash")
     object SquashGameEnd : Screen("squashGameEnded")
     object MultiplePointer : Screen("multiplePointer")
+    object SinglePointer : Screen("singlePointer")
     object MultiplePointerPlayer : Screen("multiplePointerPlayer")
+    object SinglePointerPlayer : Screen("singlePointerPlayer")
 }
