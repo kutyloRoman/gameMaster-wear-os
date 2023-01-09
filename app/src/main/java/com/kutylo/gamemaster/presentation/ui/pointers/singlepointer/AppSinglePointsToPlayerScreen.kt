@@ -1,4 +1,4 @@
-package com.kutylo.gamemaster.presentation.ui.singlepointer
+package com.kutylo.gamemaster.presentation.ui.pointers.singlepointer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

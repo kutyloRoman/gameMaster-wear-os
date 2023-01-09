@@ -1,4 +1,4 @@
-package com.kutylo.gamemaster.presentation.ui.multiplepointer
+package com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -31,7 +31,6 @@ fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavControl
     var pointsAmount by remember {
         mutableStateOf("")
     }
-
 
     GameMasterTheme {
         Column(

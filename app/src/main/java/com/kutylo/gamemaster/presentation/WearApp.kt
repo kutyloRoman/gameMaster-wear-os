@@ -18,9 +18,9 @@ import com.kutylo.gamemaster.presentation.navigation.Screen
 import com.kutylo.gamemaster.presentation.navigation.PlayerIndex
 import com.kutylo.gamemaster.presentation.theme.GameMasterTheme
 import com.kutylo.gamemaster.presentation.ui.landing.LandingScreen
-import com.kutylo.gamemaster.presentation.ui.multiplepointer.AddPointsToMultiplePointer
-import com.kutylo.gamemaster.presentation.ui.multiplepointer.MultiplePointerApp
-import com.kutylo.gamemaster.presentation.ui.singlepointer.AddPointsToSinglePointer
+import com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer.AddPointsToMultiplePointer
+import com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer.MultiplePointerApp
+import com.kutylo.gamemaster.presentation.ui.pointers.singlepointer.AddPointsToSinglePointer
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameApp
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameEndedScreen
 
@@ -63,6 +63,10 @@ fun WearApp(
         "Marta",
         0
     )
+
+    var playerName = remember {
+        mutableStateOf("")
+    }
 
     var playersCount = 2;
     val multiplePointerPlayers = remember { mutableStateListOf<PointerPlayer>() }
@@ -165,9 +169,14 @@ fun WearApp(
                             ) { launchSingleTop = true }
                         },
                         onClickAddPlayer = {
-                            addPlayerToMultiplePointer(playersCount, playersList = multiplePointerPlayers)
+                            addPlayerToMultiplePointer(
+                                playersCount,
+                                playersList = multiplePointerPlayers,
+                                playerName = it
+                            )
                             playersCount++
-                        })
+                        }
+                    )
                 }
 
 
@@ -182,9 +191,14 @@ fun WearApp(
                             ) { launchSingleTop = true }
                         },
                         onClickAddPlayer = {
-                            addPlayerToMultiplePointer(singlePointerPlayersCount, playersList = singlePointerPlayers)
+                            addPlayerToMultiplePointer(
+                                singlePointerPlayersCount,
+                                playersList = singlePointerPlayers,
+                                playerName = it
+                            )
                             singlePointerPlayersCount++
-                        })
+                        }
+                    )
                 }
 
                 //Multiple pointer add point window
@@ -196,7 +210,10 @@ fun WearApp(
                         })
                 ) {
                     val index: Int = it.arguments!!.getInt(PlayerIndex)
-                    AddPointsToMultiplePointer(player = multiplePointerPlayers.get(index), swipeDismissableNavController)
+                    AddPointsToMultiplePointer(
+                        player = multiplePointerPlayers.get(index),
+                        swipeDismissableNavController
+                    )
                 }
 
 
@@ -209,7 +226,10 @@ fun WearApp(
                         })
                 ) {
                     val index: Int = it.arguments!!.getInt(PlayerIndex)
-                    AddPointsToSinglePointer(player = singlePointerPlayers.get(index), swipeDismissableNavController)
+                    AddPointsToSinglePointer(
+                        player = singlePointerPlayers.get(index),
+                        swipeDismissableNavController
+                    )
                 }
             }
         }
@@ -226,9 +246,10 @@ private fun menuNameAndCallback(
 
 private fun addPlayerToMultiplePointer(
     playersAmountIndex: Int,
-    playersList: MutableList<PointerPlayer>
+    playersList: MutableList<PointerPlayer>,
+    playerName: String
 ) {
-    val player = PointerPlayer(playersAmountIndex, "Player${playersAmountIndex + 1}", 0)
+    val player = PointerPlayer(playersAmountIndex, playerName, 0)
     playersList.add(playersAmountIndex, player)
 }
 

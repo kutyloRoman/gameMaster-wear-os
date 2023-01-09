@@ -7,4 +7,5 @@
     <string name="pointer_label">Single Pointer</string>
     <string name="multiple_pointer_label">Multiple Pointer</string>
     <string name="game_over_label">Game Over</string>
+    <string name="manual_text_entry_label">Manual Text Entry</string>
 </resources>
