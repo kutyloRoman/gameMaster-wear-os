@@ -19,6 +19,8 @@ package com.kutylo.gamemaster.presentation.navigation
  */
 const val PlayerIndex = "index"
 
+const val SCROLL_TYPE_NAV_ARGUMENT = "scrollType"
+
 sealed class Screen(
     val route: String
 ) {

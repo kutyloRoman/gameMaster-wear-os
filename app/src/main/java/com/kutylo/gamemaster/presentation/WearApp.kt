@@ -5,79 +5,45 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.material.*
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.android.wearable.composeadvanced.presentation.ui.dice.DiceRollerApp
 import com.kutylo.gamemaster.R
-import com.kutylo.gamemaster.presentation.navigation.Screen
+import com.kutylo.gamemaster.presentation.data.PointerPlayerModel
+import com.kutylo.gamemaster.presentation.navigation.DestinationScrollType
 import com.kutylo.gamemaster.presentation.navigation.PlayerIndex
+import com.kutylo.gamemaster.presentation.navigation.SCROLL_TYPE_NAV_ARGUMENT
+import com.kutylo.gamemaster.presentation.navigation.Screen
 import com.kutylo.gamemaster.presentation.theme.GameMasterTheme
+import com.kutylo.gamemaster.presentation.ui.ScalingLazyListStateViewModel
 import com.kutylo.gamemaster.presentation.ui.landing.LandingScreen
+import com.kutylo.gamemaster.presentation.ui.pointers.PointerPlayerViewModel
 import com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer.AddPointsToMultiplePointer
 import com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer.MultiplePointerApp
 import com.kutylo.gamemaster.presentation.ui.pointers.singlepointer.AddPointsToSinglePointer
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameApp
 import com.kutylo.gamemaster.presentation.ui.squash.SquashGameEndedScreen
+import com.kutylo.gamemaster.presentation.ui.squash.SquashPlayerViewModel
 
 @Composable
 fun WearApp(
     modifier: Modifier = Modifier,
-    swipeDismissableNavController: NavHostController = rememberSwipeDismissableNavController()
+    swipeDismissableNavController: NavHostController = rememberSwipeDismissableNavController(),
+    multiplePointerPlayerViewModel: PointerPlayerViewModel = viewModel(key = "MultiplePointer"),
+    squashPlayerViewModel: SquashPlayerViewModel = viewModel(),
+    singlePointerPlayerViewModel: PointerPlayerViewModel = viewModel(key = "SinglePointer")
 ) {
-    val listState = rememberScalingLazyListState()
-    var player1 = Player(
-        "Roman",
-        remember { mutableStateOf(0) },
-        remember { mutableStateOf(0) })
-    var player2 = Player(
-        "Marta",
-        remember { mutableStateOf(0) },
-        remember { mutableStateOf(0) })
-    var isGameEnded = remember { mutableStateOf(false) }
-
-
-    //Multiple Pointer vars
-    var pointerPlayer1 = PointerPlayer(
-        0,
-        "Roman",
-        0
-    )
-    var pointerPlayer2 = PointerPlayer(
-        1,
-        "Marta",
-        0
-    )
-
-    var singlePointerPlayer1 = PointerPlayer(
-        0,
-        "Roman",
-        0
-    )
-    var singlePointerPlayer2 = PointerPlayer(
-        1,
-        "Marta",
-        0
-    )
-
-    var playerName = remember {
-        mutableStateOf("")
-    }
-
-    var playersCount = 2;
-    val multiplePointerPlayers = remember { mutableStateListOf<PointerPlayer>() }
-    multiplePointerPlayers.add(pointerPlayer1)
-    multiplePointerPlayers.add(pointerPlayer2)
-
-
-    var singlePointerPlayersCount = 2;
-    val singlePointerPlayers = remember { mutableStateListOf<PointerPlayer>() }
-    singlePointerPlayers.add(singlePointerPlayer1)
-    singlePointerPlayers.add(singlePointerPlayer2)
+    val currentBackStackEntry by swipeDismissableNavController.currentBackStackEntryAsState()
+    val scrollType = currentBackStackEntry?.arguments?.getSerializable(SCROLL_TYPE_NAV_ARGUMENT)
+        ?: DestinationScrollType.NONE
 
     //Main Screen
     GameMasterTheme() {
@@ -87,9 +53,14 @@ fun WearApp(
             },
             vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
             positionIndicator = {
-                PositionIndicator(
-                    scalingLazyListState = listState
-                )
+                when (scrollType) {
+                    DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING -> {
+                        // Get or create the ViewModel associated with the current back stack entry
+                        val scrollViewModel: ScalingLazyListStateViewModel =
+                            viewModel(currentBackStackEntry!!)
+                        PositionIndicator(scalingLazyListState = scrollViewModel.scrollState)
+                    }
+                }
             }
         ) {
             SwipeDismissableNavHost(
@@ -97,7 +68,14 @@ fun WearApp(
                 startDestination = Screen.Landing.route,
                 modifier = Modifier.background(MaterialTheme.colors.background)
             ) {
-                composable(Screen.Landing.route) {
+                composable(Screen.Landing.route,
+                    arguments = listOf(
+                        navArgument(SCROLL_TYPE_NAV_ARGUMENT) {
+                            type = NavType.EnumType(DestinationScrollType::class.java)
+                            defaultValue = DestinationScrollType.SCALING_LAZY_COLUMN_SCROLLING
+                        }
+                    )) {
+                    val scalingLazyListState = scalingLazyListState(it)
                     val focusRequester = remember { FocusRequester() }
 
                     val menuItems = listOf(
@@ -124,7 +102,7 @@ fun WearApp(
                     )
 
                     LandingScreen(
-                        scalingLazyListState = listState,
+                        scalingLazyListState = scalingLazyListState,
                         focusRequester = focusRequester,
                         menuItems = menuItems
                     )
@@ -137,14 +115,11 @@ fun WearApp(
 
                 //Squash Main Window
                 composable(Screen.Squash.route) {
-                    SquashGameApp(isGameEnded, onGameIsEnded = {
-                        player1.points.value = 0
-                        player2.points.value = 0
-                        player1.games.value = 0
-                        player2.games.value = 0
-                        isGameEnded.value = false
+                    SquashGameApp(onGameIsEnded = {
+                        squashPlayerViewModel.clearPointsAndGames()
+                        squashPlayerViewModel.setIsGameEnded(false)
                         swipeDismissableNavController.navigate(route = Screen.SquashGameEnd.route)
-                    }, player1, player2)
+                    }, squashPlayerViewModel)
                 }
 
                 //Squash End Game Window
@@ -161,20 +136,18 @@ fun WearApp(
                 //Multiple pointer players window
                 composable(Screen.MultiplePointer.route) {
                     MultiplePointerApp(
-                        players = multiplePointerPlayers,
-                        listState,
+                        players = multiplePointerPlayerViewModel.pointerPlayers,
+                        scalingLazyListState(it),
                         onClickPlayer = { index ->
                             swipeDismissableNavController.navigate(
                                 Screen.MultiplePointerPlayer.route + "/" + index
                             ) { launchSingleTop = true }
                         },
                         onClickAddPlayer = {
-                            addPlayerToMultiplePointer(
-                                playersCount,
-                                playersList = multiplePointerPlayers,
+                            addPlayerToPointer(
+                                multiplePointerPlayerViewModel,
                                 playerName = it
                             )
-                            playersCount++
                         }
                     )
                 }
@@ -183,20 +156,18 @@ fun WearApp(
                 //Single pointer players window
                 composable(Screen.SinglePointer.route) {
                     MultiplePointerApp(
-                        players = singlePointerPlayers,
-                        listState,
+                        players = singlePointerPlayerViewModel.pointerPlayers,
+                        scalingLazyListState(it),
                         onClickPlayer = { index ->
                             swipeDismissableNavController.navigate(
                                 Screen.SinglePointerPlayer.route + "/" + index
                             ) { launchSingleTop = true }
                         },
                         onClickAddPlayer = {
-                            addPlayerToMultiplePointer(
-                                singlePointerPlayersCount,
-                                playersList = singlePointerPlayers,
+                            addPlayerToPointer(
+                                singlePointerPlayerViewModel,
                                 playerName = it
                             )
-                            singlePointerPlayersCount++
                         }
                     )
                 }
@@ -211,8 +182,9 @@ fun WearApp(
                 ) {
                     val index: Int = it.arguments!!.getInt(PlayerIndex)
                     AddPointsToMultiplePointer(
-                        player = multiplePointerPlayers.get(index),
-                        swipeDismissableNavController
+                        pointerPlayerViewModel = multiplePointerPlayerViewModel,
+                        playerIndex = index,
+                        swipeDismissableNavController = swipeDismissableNavController
                     )
                 }
 
@@ -227,8 +199,8 @@ fun WearApp(
                 ) {
                     val index: Int = it.arguments!!.getInt(PlayerIndex)
                     AddPointsToSinglePointer(
-                        player = singlePointerPlayers.get(index),
-                        swipeDismissableNavController
+                        singlePointerPlayerViewModel,
+                        playerIndex = index
                     )
                 }
             }
@@ -244,18 +216,19 @@ private fun menuNameAndCallback(
 ) = MenuItem(stringResource(menuNameResource)) { navController.navigate(screen.route) }
 
 
-private fun addPlayerToMultiplePointer(
-    playersAmountIndex: Int,
-    playersList: MutableList<PointerPlayer>,
+private fun addPlayerToPointer(
+    pointerPlayerViewModel: PointerPlayerViewModel,
     playerName: String
 ) {
-    val player = PointerPlayer(playersAmountIndex, playerName, 0)
-    playersList.add(playersAmountIndex, player)
+    val player = PointerPlayerModel(pointerPlayerViewModel.playersAmount, playerName, 0)
+    pointerPlayerViewModel.add(player)
+}
+
+@Composable
+private fun scalingLazyListState(it: NavBackStackEntry): ScalingLazyListState {
+    val scrollViewModel: ScalingLazyListStateViewModel = viewModel(it)
+
+    return scrollViewModel.scrollState
 }
 
 data class MenuItem(val name: String, val clickHander: () -> Unit)
-
-data class Player(val name: String, var points: MutableState<Int>, var games: MutableState<Int>)
-
-//data class PointerPlayer(val index: Int, val name: String, var points: MutableState<Int>)
-data class PointerPlayer(val index: Int, val name: String, var points: Int)

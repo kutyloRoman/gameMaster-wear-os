@@ -10,6 +10,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:keepScreenOn="true"
         android:theme="@android:style/Theme.DeviceDefault">
         <uses-library
             android:name="com.google.android.wearable"
@@ -23,6 +24,7 @@
             android:name=".presentation.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:keepScreenOn="true"
             android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

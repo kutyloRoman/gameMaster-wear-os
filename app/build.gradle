@@ -67,6 +67,7 @@ dependencies {
     implementation 'androidx.wear:wear-input:1.2.0-alpha02'
 
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
     implementation 'androidx.activity:activity-compose:1.6.1'
 
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"

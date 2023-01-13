@@ -3,14 +3,17 @@ package com.kutylo.gamemaster.presentation.ui.pointers.multiplepointer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Surface
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -19,18 +22,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.kutylo.gamemaster.R
-import com.kutylo.gamemaster.presentation.PointerPlayer
+import com.kutylo.gamemaster.presentation.data.PointerPlayerModel
 import com.kutylo.gamemaster.presentation.navigation.Screen
 import com.kutylo.gamemaster.presentation.theme.GameMasterTheme
+import com.kutylo.gamemaster.presentation.ui.pointers.PointerPlayerViewModel
 
 @Composable
-fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavController: NavHostController) {
+fun AddPointsToMultiplePointer(
+    pointerPlayerViewModel: PointerPlayerViewModel,
+    swipeDismissableNavController: NavHostController,
+    playerIndex: Int
+) {
     val focusManager = LocalFocusManager.current
     var pointsAmount by remember {
-        mutableStateOf("")
+        mutableStateOf("0")
     }
+
+    val player = pointerPlayerViewModel.getPlayer(index = playerIndex)
 
     GameMasterTheme {
         Column(
@@ -50,7 +61,8 @@ fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavControl
             EditNumberField(modifier = Modifier.width(150.dp),
                 value = pointsAmount,
                 label = "Points",
-                onValueChange = { pointsAmount = it },
+                onValueChange = {
+                    pointsAmount = it },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Go
@@ -62,7 +74,10 @@ fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavControl
             Row(horizontalArrangement = Arrangement.Center) {
                 Button(modifier = Modifier.padding(end = 25.dp),
                     onClick = {
-                        player.points = player.points + pointsAmount.toInt()
+                        pointerPlayerViewModel.updatePlayerPoints(
+                            playerIndex,
+                            player.points + pointsAmount.toInt()
+                        )
                         swipeDismissableNavController.navigate(
                             Screen.MultiplePointer.route
                         ) {
@@ -75,7 +90,10 @@ fun AddPointsToMultiplePointer(player: PointerPlayer, swipeDismissableNavControl
                 Button(
                     modifier = Modifier.padding(start = 25.dp),
                     onClick = {
-                        player.points = player.points - pointsAmount.toInt()
+                        pointerPlayerViewModel.updatePlayerPoints(
+                            playerIndex,
+                            player.points - pointsAmount.toInt()
+                        )
                         swipeDismissableNavController.navigate(
                             Screen.MultiplePointer.route
                         ) {
@@ -102,16 +120,16 @@ fun EditNumberField(
     keyboardActions: KeyboardActions,
     modifier: Modifier = Modifier
 ) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .padding(start = 25.dp, end = 25.dp, bottom = 5.dp)
-            .fillMaxWidth(),
-        singleLine = true,
-        label = { Text(text = label, textAlign = TextAlign.Center) },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions
-    )
-
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier
+                .padding(start = 15.dp, end = 15.dp, bottom = 5.dp)
+                .fillMaxWidth(),
+            singleLine = true,
+            textStyle = TextStyle(color = Color.White, textAlign = TextAlign.Center),
+            label = { Text(text = label, textAlign = TextAlign.Center) },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions
+        )
 }

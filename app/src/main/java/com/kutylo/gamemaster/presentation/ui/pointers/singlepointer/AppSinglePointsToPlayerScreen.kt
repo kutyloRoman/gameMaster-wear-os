@@ -12,13 +12,15 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Stepper
 import androidx.wear.compose.material.StepperDefaults
 import androidx.wear.compose.material.Text
-import com.kutylo.gamemaster.presentation.PointerPlayer
+import com.kutylo.gamemaster.presentation.ui.pointers.PointerPlayerViewModel
 
 @Composable
 fun AddPointsToSinglePointer(
-    player: PointerPlayer,
-    swipeDismissableNavController: NavHostController
+    singlePointerPlayerViewModel: PointerPlayerViewModel,
+    playerIndex: Int
 ) {
+
+    val player = singlePointerPlayerViewModel.getPlayer(index = playerIndex)
     var point by remember {
         mutableStateOf(player.points)
     }

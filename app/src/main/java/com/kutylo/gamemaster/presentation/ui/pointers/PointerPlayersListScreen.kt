@@ -6,22 +6,20 @@ import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
-import com.kutylo.gamemaster.presentation.PointerPlayer
+import com.kutylo.gamemaster.presentation.data.PointerPlayerModel
 
 
 @Composable
 fun MultiplePointerApp(
-    players: List<PointerPlayer>,
+    players: List<PointerPlayerModel>,
     listState: ScalingLazyListState,
     onClickPlayer: (Int) -> Unit,
     onClickAddPlayer: (value: String) -> Unit
@@ -44,7 +42,7 @@ fun MultiplePointerApp(
         anchorType = ScalingLazyListAnchorType.ItemStart,
         state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+//        verticalArrangement = Arrangement.spacedBy(8.dp),
         autoCentering = AutoCenteringParams(itemIndex = 0, itemOffset = 0)
     ) {
         items(players) { player ->
@@ -79,7 +77,7 @@ fun MultiplePointerApp(
 }
 
 @Composable
-fun PlayerChip(player: PointerPlayer, onClickPlayer: (Int) -> Unit) {
+fun PlayerChip(player: PointerPlayerModel, onClickPlayer: (Int) -> Unit) {
     Chip(
         onClick = { onClickPlayer(player.index) },
         modifier = Modifier.fillMaxWidth(),
